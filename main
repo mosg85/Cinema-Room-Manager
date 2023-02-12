@@ -1,0 +1,142 @@
+class Cinema
+const val TEN = 10
+const val EIGHT = 8
+const val SIXTY = 60
+const val TWO = 2
+fun main() {
+    var row: Int = 0
+    var seat: Int = 0
+    println("Enter the number of rows:")
+    val rows: Int = readln().toInt()
+    println("Enter the number of seats in each row:")
+    val seats = readln().toInt()
+    val listCinema = MutableList(rows) { MutableList(seats) { 'S' } }
+    menuPrint(totalIncome(rows, seats), listCinema, listCinema, row, seat)
+}
+fun printCinema(list1: MutableList<MutableList<Char>>) {
+    println("")
+    print("Cinema:\n ")
+    for (i in list1[0].indices) {
+        print(" ${i + 1}")
+    }
+    println()
+    for (i in list1.indices) {
+        print("${i + 1} ")
+        print(list1[i].joinToString(" "))
+        println()
+    }
+}
+fun priceTicket(row: Int, seat: Int, list: MutableList<MutableList<Char>>) {
+    try {
+        println("")
+        println("Enter a row number:")
+        val row = readln().toInt()
+        println("Enter a seat number in that row:")
+        val seat = readln().toInt()
+        println()
+        if (list[row - 1][seat - 1] == 'B') {
+            println("That ticket has already been purchased!")
+            return priceTicket(row, seat, list)
+        } else if (row < 10 && seat < 10 && list.size * list[0].size < 60 || row <= list[0].size / 2) {
+            print("Ticket price: $10")
+        } else if (row >= 10 || seat >= 10) {
+            println("Wrong input!")
+            return priceTicket(row, seat, list)
+        } else {
+            print("Ticket price: $8")
+
+        }
+        list[row - 1][seat - 1] = 'B'
+        println("")
+
+
+    } catch (e: Exception) {
+        println("Wrong input!")
+        return priceTicket(row, seat, list)
+    }
+}
+
+fun menuPrint(
+    totalIncome: Int,
+    list1: MutableList<MutableList<Char>>,
+    list: MutableList<MutableList<Char>>,
+    row: Int,
+    seat: Int
+) {
+    while (true) {
+        println(" ")
+        println("1. Show the seats")
+        println("2. Buy a ticket")
+        println("3. Statistics")
+        println("0. Exit")
+        when (readln()) {
+            "1" -> printCinema(list1)
+            "2" -> priceTicket(row, seat, list)
+            "3" -> printStatistics(totalIncome, list)
+            "Exit", "exit", "0" -> return
+        }
+    }
+}
+fun printStatistics(
+    totalIncome: Int,
+    list: MutableList<MutableList<Char>>
+) {
+    println(" ")
+    println("Number of purchased tickets: ${purchasedTickets(list)}")
+    println("Percentage: ${formatPercentage(list)}%")
+    println("Current income: $${currentIncome(list)}")
+    println("Total income: $$totalIncome")
+
+}
+fun totalIncome(rows: Int, seats: Int): Int {
+    val overall = rows * seats
+    return if (overall <= SIXTY) {
+        overall * TEN
+    } else {
+        val half = rows / TWO
+        half * seats * TEN + (rows - half) * seats * EIGHT
+    }
+}
+fun currentIncome(list1: MutableList<MutableList<Char>>): Int {
+    var costSoldTickets = 0
+    for (m in list1[0].indices) {
+        for (n in list1.indices) {
+            if (list1[m][n] == 'B') {
+                costSoldTickets += cost(list1.size -1, m +1)
+            }
+        }
+    }
+    return costSoldTickets
+}
+
+fun cost(seat: Int, row: Int): Int {
+    var costOfSeat = 10
+    if (row >= 5 && seat >= 5) costOfSeat = 8
+    return costOfSeat
+}
+fun purchasedTickets(list: MutableList<MutableList<Char>>): Int {
+    var countSoldTickets = 0
+    for (m in list[0].indices) {
+        for (n in list.indices) {
+
+            if (list[m][n] == 'B') {
+                countSoldTickets++
+            }
+        }
+    }
+    return countSoldTickets
+}
+
+fun formatPercentage(list: MutableList<MutableList<Char>>): String {
+    var countAllTickets = 0
+    var countSoldTickets = 0
+    for (m in list[0].indices) {
+        for (n in list.indices) {
+            countAllTickets++
+            if (list[m][n] == 'B') {
+                countSoldTickets++
+            }
+        }
+    }
+    return "%.2f".format(countSoldTickets.toDouble() / countAllTickets.toDouble() * 100)
+}
